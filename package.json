@@ -1,0 +1,29 @@
+{
+  "name": "scoreboard-draggable-list",
+  "version": "1.0.0",
+  "description": "Draggable/Sortable lists for Scoreboard",
+  "main": "index.js",
+  "scripts": {
+    "bundle": "browserify -r ./index.js:draggable-list -r d3 > example/bundle.js -d",
+    "watch": "watchify -r ./index.js:draggable-list -r d3 -o example/bundle.js -d"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SpiderStrategies/draggable-list.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SpiderStrategies/scoreboard-draggable-list/issues"
+  },
+  "homepage": "https://github.com/SpiderStrategies/scoreboard-draggable-list",
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "smokestack": "^3.4.1",
+    "tape": "^4.4.0",
+    "watchify": "^3.7.0"
+  },
+  "dependencies": {
+    "d3": "^3.5.14"
+  }
+}
