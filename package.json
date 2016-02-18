@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bundle": "browserify -r ./index.js:draggable-list -r d3 > example/bundle.js -d",
+    "test": "browserify test/* | smokestack",
     "watch": "watchify -r ./index.js:draggable-list -r d3 -o example/bundle.js -d"
   },
   "repository": {

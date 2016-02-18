@@ -11,7 +11,7 @@ var _createTraveler = function (source, parent) {
 
   d3.select(traveler)
     .classed('traveler', true)
-    .classed('placehoder', false)
+    .classed('placeholder', false)
     .style('top', source.offsetTop + 'px')
     .style('width', d3.select(source).style('width'))
     .style('height', d3.select(source).style('height'))
@@ -57,7 +57,7 @@ var List = function (container) {
     var start = Array.prototype.slice.call(parent.children).indexOf(this)
       , node = this
     d3.select(this)
-      .classed('placehoder', true)
+      .classed('placeholder', true)
       .property('__startIndex__', start)
 
     _createTraveler(this, parent)
@@ -76,7 +76,8 @@ var List = function (container) {
 
   drag.on('drag', function () {
     var bb = this.getBoundingClientRect()
-      , lowerBound = parent.offsetHeight + parent.scrollTop - bb.height
+      , containerBottom = parent.offsetHeight + parent.scrollTop
+      , lowerBound = containerBottom - bb.height
       , y = clamp(d3.event.y - bb.height / 2, 0, lowerBound) // Top of the moving node
 
     // Reposition the traveling node
@@ -92,8 +93,9 @@ var List = function (container) {
     var targetRect = target.getBoundingClientRect()
       , targetMiddle = target.offsetTop + targetRect.height / 2
       , mouseDelta = Math.abs(targetMiddle - (y + bb.height / 2))
+      , mouseOutside = d3.event.y < 0 || d3.event.y > containerBottom
 
-    if (mouseDelta / targetMiddle > .1) {
+    if (mouseDelta / targetMiddle > .1 && !mouseOutside) {
       // Too far away, carry on
       return
     }
@@ -148,7 +150,7 @@ var List = function (container) {
 
   function cleanup (node) {
     d3.select(window).on('keydown.dnd-escape', null)
-    d3.select(node).classed('placehoder', false)
+    d3.select(node).classed('placeholder', false)
                    .property('__startIndex__', null)
     d3.selectAll('.traveler', parent).remove()
   }
