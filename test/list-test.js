@@ -9,7 +9,7 @@ function setup () {
   container.style['margin-top'] = '100px'
   container.style['margin-left'] = '50px'
 
-  container.innerHTML = '<ul style="position: relative;">' +
+  container.innerHTML = '<ul>' +
                           '<li style="height: 50px;">KPI Dashboards</li>' +
                           '<li style="height: 50px;">Mayberry</li>' +
                           '<li style="height: 200px;">Yummygum</li>' +

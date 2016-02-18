@@ -49,6 +49,7 @@ function animate (prevRect, target) {
 
 var List = function (container) {
   var ul = d3.select(container)
+             .style('position', 'relative') // needed for dnd to work
     , self = this
     , parent = ul.node()
     , drag = d3.behavior.drag()
