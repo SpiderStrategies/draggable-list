@@ -37,7 +37,7 @@ test('creates the traveler', function (t) {
   t.equal(traveler.style.position, 'absolute', 'traveler has absolute positioning')
   t.equal(traveler.style.top, '50px', 'traveler top set')
   t.equal(traveler.style.height, '50px', 'traveler height set')
-  t.equal(traveler.style.width, '1141px', 'traveler width set')
+  t.equal(traveler.style.width, '701px', 'traveler width set')
   t.equal(traveler.innerHTML, 'Mayberry', 'node contents set')
 
   container.remove()
