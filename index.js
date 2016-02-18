@@ -11,7 +11,7 @@ var _createTraveler = function (source, parent) {
 
   d3.select(traveler)
     .classed('traveler', true)
-    .classed('placehoder', false)
+    .classed('placeholder', false)
     .style('top', source.offsetTop + 'px')
     .style('width', d3.select(source).style('width'))
     .style('height', d3.select(source).style('height'))
@@ -57,7 +57,7 @@ var List = function (container) {
     var start = Array.prototype.slice.call(parent.children).indexOf(this)
       , node = this
     d3.select(this)
-      .classed('placehoder', true)
+      .classed('placeholder', true)
       .property('__startIndex__', start)
 
     _createTraveler(this, parent)
@@ -148,7 +148,7 @@ var List = function (container) {
 
   function cleanup (node) {
     d3.select(window).on('keydown.dnd-escape', null)
-    d3.select(node).classed('placehoder', false)
+    d3.select(node).classed('placeholder', false)
                    .property('__startIndex__', null)
     d3.selectAll('.traveler', parent).remove()
   }
