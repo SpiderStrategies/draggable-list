@@ -7,11 +7,18 @@ var clamp = function (value, min, max) {
 }
 
 var _createTraveler = function (source, parent) {
+  if (d3.select('.traveler', parent).size()) {
+    // Already created
+    return
+  }
+
   var traveler = source.cloneNode(true)
+
+  d3.select(source)
+    .classed('placeholder', true)
 
   d3.select(traveler)
     .classed('traveler', true)
-    .classed('placeholder', false)
     .style('top', source.offsetTop + 'px')
     .style('width', d3.select(source).style('width'))
     .style('height', d3.select(source).style('height'))
@@ -53,15 +60,14 @@ var List = function (container) {
     , self = this
     , parent = ul.node()
     , drag = d3.behavior.drag()
+    , travelerTimeout = null
 
   drag.on('dragstart', function () {
     var start = Array.prototype.slice.call(parent.children).indexOf(this)
       , node = this
-    d3.select(this)
-      .classed('placeholder', true)
-      .property('__startIndex__', start)
 
-    _createTraveler(this, parent)
+    d3.select(this).property('__startIndex__', start)
+    travelerTimeout = setTimeout(_createTraveler.bind(null, this, parent), 300)
     self.emit('dndstart')
 
     d3.select(window)
@@ -76,6 +82,8 @@ var List = function (container) {
   })
 
   drag.on('drag', function () {
+    _createTraveler(this, parent)
+
     var bb = this.getBoundingClientRect()
       , containerBottom = parent.offsetHeight + parent.scrollTop
       , lowerBound = containerBottom - bb.height
@@ -105,6 +113,10 @@ var List = function (container) {
   })
 
   drag.on('dragend', function () {
+    if (travelerTimeout) {
+      window.clearTimeout(travelerTimeout)
+    }
+
     var startIndex = d3.select(this).property('__startIndex__')
       , newIndex = Array.prototype.slice.call(parent.children).indexOf(this)
 

@@ -21,27 +21,61 @@ function setup () {
   return container
 }
 
+function trigger (node, type, opts) {
+  opts = opts || {}
+  var e = document.createEvent('Event')
+  for (var arg in opts) {
+    e[arg] = opts[arg]
+  }
+  e.initEvent(type, true, true)
+  node.dispatchEvent(e)
+}
+
+test('allows inner elements to have click events', function (t) {
+  var container = setup()
+    , link = document.createElement('a')
+    , li = container.querySelector('ul li:nth-child(2)')
+
+  link.addEventListener('click', function (e) {
+    container.remove()
+    t.end()
+  })
+  link.innerHTML = 'Clickable link'
+
+  li.appendChild(link)
+
+  var list = new List(container.querySelector('ul'))
+
+  // Simulate the natural sequence
+  trigger(link, 'mouseover')
+  trigger(link, 'mousedown')
+  trigger(link, 'mouseup')
+  trigger(link, 'click')
+})
+
 test('creates the traveler', function (t) {
   var container = setup()
     , list = new List(container.querySelector('ul'))
     , mover = container.querySelector('ul li:nth-child(2)')
 
-  var down = document.createEvent('Event')
-  down.initEvent('mousedown', true, true)
-  mover.dispatchEvent(down)
+  trigger(mover, 'mousedown')
 
-  t.equal(container.querySelectorAll('ul li').length, 5, '5 total nodes') // normal number + 1
+  t.ok(!container.querySelector('ul li.traveler'), 'no traveler at first')
 
-  var traveler = container.querySelector('ul li:nth-child(5)')
-  t.equal(traveler.className, 'traveler', 'last node is the traveler')
-  t.equal(traveler.style.position, 'absolute', 'traveler has absolute positioning')
-  t.equal(traveler.style.top, '50px', 'traveler top set')
-  t.equal(traveler.style.height, '50px', 'traveler height set')
-  t.equal(traveler.style.width, '701px', 'traveler width set')
-  t.equal(traveler.innerHTML, 'Mayberry', 'node contents set')
+  setTimeout(function () {
+    t.equal(container.querySelectorAll('ul li').length, 5, '5 total nodes') // normal number + 1
 
-  container.remove()
-  t.end()
+    var traveler = container.querySelector('ul li:nth-child(5)')
+    t.equal(traveler.className, 'traveler', 'last node is the traveler')
+    t.equal(traveler.style.position, 'absolute', 'traveler has absolute positioning')
+    t.equal(traveler.style.top, '50px', 'traveler top set')
+    t.equal(traveler.style.height, '50px', 'traveler height set')
+    t.equal(traveler.style.width, '701px', 'traveler width set')
+    t.equal(traveler.innerHTML, 'Mayberry', 'node contents set')
+
+    container.remove()
+    t.end()
+  }, 400)
 })
 
 test('moves a node within the list\'s bounds', function (t) {
@@ -49,25 +83,24 @@ test('moves a node within the list\'s bounds', function (t) {
     , list = new List(container.querySelector('ul'))
     , mover = container.querySelector('ul li:nth-child(1)')
 
-  var down = document.createEvent('Event')
-  down.initEvent('mousedown', true, true)
-  mover.dispatchEvent(down)
+  trigger(mover, 'mousedown')
 
-  t.equal(mover.className, 'placeholder', 'moved node has placeholder class')
   t.equal(container.querySelector('ul').children[0], mover, 'mover at index 0 of parent children')
 
-  var move = document.createEvent('Event')
-  move.initEvent('mousemove', true, true)
-  move.clientY = 10000 // Slam it
-  move.clientX = 110
-  mover.dispatchEvent(move)
+  trigger(mover, 'mousemove', {
+    clientX: 100,
+    clientY: 10000 // Slam it
+  })
 
+  t.equal(mover.className, 'placeholder', 'moved node has placeholder class')
   t.equal(container.querySelector('ul').children[3].innerHTML, mover.innerHTML, 'mover now at index 3 of parent children')
   t.equal(container.querySelector('ul li:nth-child(5)').style.top, '300px', 'traveler top set')
 
   setTimeout(function () {
-    move.clientY = -10000
-    container.querySelector('ul li:nth-child(4)').dispatchEvent(move)
+    trigger(mover, 'mousemove', {
+      clientX: 100,
+      clientY: -10000 // unslam it
+    })
     t.equal(container.querySelector('ul').children[0].innerHTML, mover.innerHTML, 'mover now at index 0 of parent children')
     t.equal(container.querySelector('ul li:nth-child(5)').style.top, '0px', 'traveler top set')
 
@@ -89,24 +122,18 @@ test('fires move events', function (t) {
     t.end()
   })
 
-  var down = document.createEvent('Event')
-  down.initEvent('mousedown', true, true)
-  mover.dispatchEvent(down)
-
-  var move = document.createEvent('Event')
-  move.initEvent('mousemove', true, true)
-  move.clientY = 300
-  move.clientX = 110
-  mover.dispatchEvent(move)
-
-  var up = document.createEvent('Event')
-  up.initEvent('mouseup', true, true)
-  mover.dispatchEvent(up)
+  trigger(mover, 'mousedown')
+  trigger(mover, 'mousemove', {
+    clientX: 110,
+    clientY: 300
+  })
+  trigger(mover, 'mouseup')
 })
 
 test('fires dnd events', function (t) {
   var container = setup()
     , list = new List(container.querySelector('ul'))
+    , li = container.querySelector('ul li:nth-child(2)')
     , calls = 0
 
   list.on('dndstart', function () {
@@ -121,23 +148,14 @@ test('fires dnd events', function (t) {
     calls++
   })
 
-  var down = document.createEvent('Event')
-  down.initEvent('mousedown', true, true)
-  container.querySelector('ul li:nth-child(2)').dispatchEvent(down)
 
-  var move = document.createEvent('Event')
-  move.initEvent('mousemove', true, true)
-  container.querySelector('ul li:nth-child(2)').dispatchEvent(move)
-
-  var escape = document.createEvent('Event')
-  escape.initEvent('keydown', true, true)
-  escape.keyCode = 27
-  window.dispatchEvent(escape)
-
-  container.querySelector('ul li:nth-child(2)').dispatchEvent(down)
-  var up = document.createEvent('Event')
-  up.initEvent('mouseup', true, true)
-  container.querySelector('ul li:nth-child(2)').dispatchEvent(up)
+  trigger(li, 'mousedown')
+  trigger(li, 'mousemove')
+  trigger(window, 'keydown', {
+    keyCode: 27
+  })
+  trigger(li, 'mousedown')
+  trigger(li, 'mouseup')
 
   t.equal(calls, 4, '4 events emitted')
 
