@@ -76,7 +76,8 @@ var List = function (container) {
 
   drag.on('drag', function () {
     var bb = this.getBoundingClientRect()
-      , lowerBound = parent.offsetHeight + parent.scrollTop - bb.height
+      , containerBottom = parent.offsetHeight + parent.scrollTop
+      , lowerBound = containerBottom - bb.height
       , y = clamp(d3.event.y - bb.height / 2, 0, lowerBound) // Top of the moving node
 
     // Reposition the traveling node
@@ -92,8 +93,9 @@ var List = function (container) {
     var targetRect = target.getBoundingClientRect()
       , targetMiddle = target.offsetTop + targetRect.height / 2
       , mouseDelta = Math.abs(targetMiddle - (y + bb.height / 2))
+      , mouseOutside = d3.event.y < 0 || d3.event.y > containerBottom
 
-    if (mouseDelta / targetMiddle > .1) {
+    if (mouseDelta / targetMiddle > .1 && !mouseOutside) {
       // Too far away, carry on
       return
     }
