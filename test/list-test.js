@@ -31,6 +31,28 @@ function trigger (node, type, opts) {
   node.dispatchEvent(e)
 }
 
+test('allows inner elements to have click events', function (t) {
+  var container = setup()
+    , link = document.createElement('a')
+    , li = container.querySelector('ul li:nth-child(2)')
+
+  link.addEventListener('click', function (e) {
+    container.remove()
+    t.end()
+  })
+  link.innerHTML = 'Clickable link'
+
+  li.appendChild(link)
+
+  var list = new List(container.querySelector('ul'))
+
+  // Simulate the natural sequence
+  trigger(link, 'mouseover')
+  trigger(link, 'mousedown')
+  trigger(link, 'mouseup')
+  trigger(link, 'click')
+})
+
 test('creates the traveler', function (t) {
   var container = setup()
     , list = new List(container.querySelector('ul'))
@@ -38,18 +60,22 @@ test('creates the traveler', function (t) {
 
   trigger(mover, 'mousedown')
 
-  t.equal(container.querySelectorAll('ul li').length, 5, '5 total nodes') // normal number + 1
+  t.ok(!container.querySelector('ul li.traveler'), 'no traveler at first')
 
-  var traveler = container.querySelector('ul li:nth-child(5)')
-  t.equal(traveler.className, 'traveler', 'last node is the traveler')
-  t.equal(traveler.style.position, 'absolute', 'traveler has absolute positioning')
-  t.equal(traveler.style.top, '50px', 'traveler top set')
-  t.equal(traveler.style.height, '50px', 'traveler height set')
-  t.equal(traveler.style.width, '701px', 'traveler width set')
-  t.equal(traveler.innerHTML, 'Mayberry', 'node contents set')
+  setTimeout(function () {
+    t.equal(container.querySelectorAll('ul li').length, 5, '5 total nodes') // normal number + 1
 
-  container.remove()
-  t.end()
+    var traveler = container.querySelector('ul li:nth-child(5)')
+    t.equal(traveler.className, 'traveler', 'last node is the traveler')
+    t.equal(traveler.style.position, 'absolute', 'traveler has absolute positioning')
+    t.equal(traveler.style.top, '50px', 'traveler top set')
+    t.equal(traveler.style.height, '50px', 'traveler height set')
+    t.equal(traveler.style.width, '701px', 'traveler width set')
+    t.equal(traveler.innerHTML, 'Mayberry', 'node contents set')
+
+    container.remove()
+    t.end()
+  }, 400)
 })
 
 test('moves a node within the list\'s bounds', function (t) {
@@ -59,7 +85,6 @@ test('moves a node within the list\'s bounds', function (t) {
 
   trigger(mover, 'mousedown')
 
-  t.equal(mover.className, 'placeholder', 'moved node has placeholder class')
   t.equal(container.querySelector('ul').children[0], mover, 'mover at index 0 of parent children')
 
   trigger(mover, 'mousemove', {
@@ -67,6 +92,7 @@ test('moves a node within the list\'s bounds', function (t) {
     clientY: 10000 // Slam it
   })
 
+  t.equal(mover.className, 'placeholder', 'moved node has placeholder class')
   t.equal(container.querySelector('ul').children[3].innerHTML, mover.innerHTML, 'mover now at index 3 of parent children')
   t.equal(container.querySelector('ul li:nth-child(5)').style.top, '300px', 'traveler top set')
 

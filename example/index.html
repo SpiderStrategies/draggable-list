@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans Pro:200italic,200,300italic,300,400italic,400,600italic,600,700italic,700,900italic,900" rel="stylesheet" type="text/css">
     <style>
-
       body {
         height: 100%;
         text-align: center;
@@ -57,13 +56,16 @@
   <body>
       <div id="container">
         <ul class="draggable-list">
-          <li>KPI Dashboards</li>
+          <li>
+              KPI Dashboards
+              <span class="toggle">&#x1f608;</span>
+          </li>
           <li>Mayberry</li>
           <li class="alert">
             Yummygum
-
+            <button onclick="alert('heyo');">Click me!</button>
           </li>
-          <li>Spider Strategies</li>
+          <li><a href="http://spiderstrategies.com">Spider Strategies</a></li>
         </ul>
       </div>
 
@@ -72,6 +74,15 @@
 <script src="./bundle.js"></script>
 <script>
   (function () {
+    // Add some event handlers for testing
+
+    var togglers = document.querySelectorAll('.toggle')
+    for (var i = 0; i < togglers.length; i++) {
+      togglers[i].addEventListener('click', function (e) {
+        console.log('clicked', this.parentNode)
+      }, false)
+    }
+
     var List = require('draggable-list')
       , d3 = require('d3')
 
