@@ -86,8 +86,8 @@ var List = function (container) {
 
     var bb = this.getBoundingClientRect()
       , containerBottom = parent.offsetHeight + parent.scrollTop
-      , lowerBound = containerBottom - bb.height
-      , y = clamp(d3.event.y - bb.height / 2, 0, lowerBound) // Top of the moving node
+      , lowerBound = containerBottom - bb.height / 2
+      , y = clamp(d3.event.y - bb.height / 2, -(bb.height / 2), lowerBound) // Top of the moving node
 
     // Reposition the traveling node
     d3.select('.traveler', parent)

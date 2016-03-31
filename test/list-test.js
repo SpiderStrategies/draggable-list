@@ -93,8 +93,8 @@ test('moves a node within the list\'s bounds', function (t) {
   })
 
   t.equal(mover.className, 'placeholder', 'moved node has placeholder class')
-  t.equal(container.querySelector('ul').children[3].innerHTML, mover.innerHTML, 'mover now at index 3 of parent children')
-  t.equal(container.querySelector('ul li:nth-child(5)').style.top, '300px', 'traveler top set')
+  t.equal(container.querySelector('ul').children[4].innerHTML, mover.innerHTML, 'mover now at index 4 of parent children')
+  t.equal(container.querySelector('ul li:nth-child(5)').style.top, '325px', 'traveler top set')
 
   setTimeout(function () {
     trigger(mover, 'mousemove', {
@@ -102,7 +102,7 @@ test('moves a node within the list\'s bounds', function (t) {
       clientY: -10000 // unslam it
     })
     t.equal(container.querySelector('ul').children[0].innerHTML, mover.innerHTML, 'mover now at index 0 of parent children')
-    t.equal(container.querySelector('ul li:nth-child(5)').style.top, '0px', 'traveler top set')
+    t.equal(container.querySelector('ul li:nth-child(5)').style.top, '-25px', 'traveler top set')
 
     container.remove()
     t.end()
