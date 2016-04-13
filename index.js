@@ -44,7 +44,7 @@ var List = function (container) {
       , node = this
 
     d3.select(this).property('__startIndex__', start)
-    travelerTimeout = setTimeout(_createTraveler.bind(null, this, parent), 300)
+    travelerTimeout = setTimeout(dndstart.bind(null, this, parent), 300)
 
     d3.select(window)
       .on('keydown.dnd-escape', function () {
@@ -59,7 +59,7 @@ var List = function (container) {
 
   drag.on('drag', function () {
     if (!dragging) {
-      _createTraveler(this, parent)
+      dndstart(this, parent)
       clearTimeout(travelerTimeout)
       dragging = true
     }
@@ -141,7 +141,7 @@ var List = function (container) {
     }
   }
 
-  function _createTraveler (source, parent) {
+  function dndstart (source, parent) {
     if (d3.select('.traveler', parent).size()) {
       // Already created
       return
@@ -164,12 +164,14 @@ var List = function (container) {
     parent.appendChild(traveler)
 
     self.emit('dndstart')
+    ul.classed('is-dragging', true)
 
     return traveler
   }
 
   function cleanup (node) {
     dragging = false
+    ul.classed('is-dragging', false)
     d3.select(window).on('keydown.dnd-escape', null)
     d3.select(node).classed('placeholder', false)
                    .property('__startIndex__', null)
