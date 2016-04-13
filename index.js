@@ -6,31 +6,6 @@ var clamp = function (value, min, max) {
   return Math.min(Math.max(value, min), max)
 }
 
-var _createTraveler = function (source, parent) {
-  if (d3.select('.traveler', parent).size()) {
-    // Already created
-    return
-  }
-
-  var traveler = source.cloneNode(true)
-
-  d3.select(source)
-    .classed('placeholder', true)
-
-  d3.select(traveler)
-    .classed('traveler', true)
-    .style('top', source.offsetTop + 'px')
-    .style('width', d3.select(source).style('width'))
-    .style('height', d3.select(source).style('height'))
-    .style('position', 'absolute')
-    .style('z-index', 1000)
-    .style('pointerEvents', 'none')
-
-  parent.appendChild(traveler)
-
-  return traveler
-}
-
 function animate (prevRect, target) {
   var currentRect = target.getBoundingClientRect()
     , ms = 250
@@ -62,6 +37,7 @@ var List = function (container) {
     , parent = ul.node()
     , drag = d3.behavior.drag()
     , travelerTimeout = null
+    , dragging = false
 
   drag.on('dragstart', function () {
     var start = Array.prototype.slice.call(parent.children).indexOf(this)
@@ -69,7 +45,6 @@ var List = function (container) {
 
     d3.select(this).property('__startIndex__', start)
     travelerTimeout = setTimeout(_createTraveler.bind(null, this, parent), 300)
-    self.emit('dndstart')
 
     d3.select(window)
       .on('keydown.dnd-escape', function () {
@@ -83,7 +58,11 @@ var List = function (container) {
   })
 
   drag.on('drag', function () {
-    _createTraveler(this, parent)
+    if (!dragging) {
+      _createTraveler(this, parent)
+      clearTimeout(travelerTimeout)
+      dragging = true
+    }
 
     var bb = this.getBoundingClientRect()
       , containerBottom = parent.offsetHeight + parent.scrollTop
@@ -162,7 +141,35 @@ var List = function (container) {
     }
   }
 
+  function _createTraveler (source, parent) {
+    if (d3.select('.traveler', parent).size()) {
+      // Already created
+      return
+    }
+
+    var traveler = source.cloneNode(true)
+
+    d3.select(source)
+      .classed('placeholder', true)
+
+    d3.select(traveler)
+      .classed('traveler', true)
+      .style('top', source.offsetTop + 'px')
+      .style('width', d3.select(source).style('width'))
+      .style('height', d3.select(source).style('height'))
+      .style('position', 'absolute')
+      .style('z-index', 1000)
+      .style('pointerEvents', 'none')
+
+    parent.appendChild(traveler)
+
+    self.emit('dndstart')
+
+    return traveler
+  }
+
   function cleanup (node) {
+    dragging = false
     d3.select(window).on('keydown.dnd-escape', null)
     d3.select(node).classed('placeholder', false)
                    .property('__startIndex__', null)
