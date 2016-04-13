@@ -148,17 +148,21 @@ test('fires dnd events', function (t) {
     calls++
   })
 
-
   trigger(li, 'mousedown')
   trigger(li, 'mousemove')
   trigger(window, 'keydown', {
     keyCode: 27
   })
   trigger(li, 'mousedown')
-  trigger(li, 'mouseup')
 
-  t.equal(calls, 4, '4 events emitted')
+  // Wait for the start event to trigger from create traveler callback
+  setTimeout(function () {
+    trigger(li, 'mouseup')
 
-  container.remove()
-  t.end()
+    t.equal(calls, 4, '4 events emitted')
+
+    container.remove()
+    t.end()
+  }, 350)
+
 })
