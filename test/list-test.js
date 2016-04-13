@@ -1,5 +1,6 @@
 var test = require('tape').test
   , List = require('../')
+  , d3 = require('d3')
 
 function setup () {
   var container = document.createElement('div')
@@ -51,6 +52,27 @@ test('allows inner elements to have click events', function (t) {
   trigger(link, 'mousedown')
   trigger(link, 'mouseup')
   trigger(link, 'click')
+})
+
+test('applies dragging class during drag', function (t) {
+  var container = setup()
+    , ul = container.querySelector('ul')
+    , list = new List(ul)
+    , mover = container.querySelector('ul li:nth-child(1)')
+
+  t.ok(!d3.select(ul).classed('is-dragging'), 'ul does not have `is-dragging` css class')
+
+  trigger(mover, 'mousedown')
+  trigger(mover, 'mousemove', {
+    clientX: 100,
+    clientY: 100
+  })
+  t.ok(d3.select(ul).classed('is-dragging'), 'ul has `is-dragging` css class')
+  trigger(mover, 'mouseup')
+  t.ok(!d3.select(ul).classed('is-dragging'), 'ul does not have `is-dragging` css class')
+
+  container.remove()
+  t.end()
 })
 
 test('creates the traveler', function (t) {
