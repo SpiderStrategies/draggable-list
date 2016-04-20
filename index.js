@@ -40,6 +40,11 @@ var List = function (container) {
     , dragging = false
 
   drag.on('dragstart', function () {
+    if (d3.event.sourceEvent.which !== 1) {
+      // Prevent dnd if not normal left click
+      return
+    }
+
     var start = Array.prototype.slice.call(parent.children).indexOf(this)
       , node = this
 
@@ -58,6 +63,10 @@ var List = function (container) {
   })
 
   drag.on('drag', function () {
+    if (d3.event.sourceEvent.which !== 1) {
+      return
+    }
+
     if (!dragging) {
       dndstart(this, parent)
       clearTimeout(travelerTimeout)
@@ -93,6 +102,10 @@ var List = function (container) {
   })
 
   drag.on('dragend', function () {
+    if (d3.event.sourceEvent.which !== 1) {
+      return
+    }
+
     if (travelerTimeout) {
       window.clearTimeout(travelerTimeout)
     }

@@ -28,6 +28,7 @@ function trigger (node, type, opts) {
   for (var arg in opts) {
     e[arg] = opts[arg]
   }
+  e.which = 1
   e.initEvent(type, true, true)
   node.dispatchEvent(e)
 }
