@@ -6,6 +6,11 @@ var clamp = function (value, min, max) {
   return Math.min(Math.max(value, min), max)
 }
 
+var leftClick = function (e) {
+  return (/^mouse/.test(e.type) && e.which === 1 && !e.ctrlKey) ||
+         /^touch/.test(e.type)
+}
+
 function animate (prevRect, target) {
   var currentRect = target.getBoundingClientRect()
     , ms = 250
@@ -40,8 +45,8 @@ var List = function (container) {
     , dragging = false
 
   drag.on('dragstart', function () {
-    if (d3.event.sourceEvent.which !== 1) {
-      // Prevent dnd if not normal left click
+    if (!leftClick(d3.event.sourceEvent)) {
+      // Prevent dnd
       return
     }
 
@@ -63,7 +68,7 @@ var List = function (container) {
   })
 
   drag.on('drag', function () {
-    if (d3.event.sourceEvent.which !== 1) {
+    if (!leftClick(d3.event.sourceEvent)) {
       return
     }
 
@@ -102,7 +107,7 @@ var List = function (container) {
   })
 
   drag.on('dragend', function () {
-    if (d3.event.sourceEvent.which !== 1) {
+    if (!leftClick(d3.event.sourceEvent)) {
       return
     }
 
