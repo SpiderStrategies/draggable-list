@@ -88,7 +88,7 @@ var List = function (container) {
       .style('top', y + 'px')
       .style('display', 'none') // Hide it so we can get the node under the traveler
 
-    var target = document.elementFromPoint(bb.left, y + parent.offsetTop + bb.height / 2)
+    var target = document.elementFromPoint(bb.left, y + parent.getBoundingClientRect().top + bb.height / 2)
 
     d3.select('.traveler', parent)
       .style('display', '') // Show it again
