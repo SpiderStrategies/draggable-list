@@ -34,7 +34,7 @@ function animate (prevRect, target) {
   }, ms)
 }
 
-var List = function (container) {
+function dnd (container) {
   var ul = d3.select(container)
              .style('position', 'relative') // needed for dnd to work
              .classed('draggable-list', true)
@@ -203,6 +203,17 @@ var List = function (container) {
 
   ul.selectAll('ul.draggable-list > li')
     .call(drag)
+}
+
+var List = function (selection) {
+  if (this instanceof List) {
+    dnd.call(this, selection)
+    return this
+  } else if (selection instanceof d3.selection) {
+    selection.each(function () {
+      dnd.call(new EventEmitter, this)
+    })
+  }
 }
 
 util.inherits(List, EventEmitter)
