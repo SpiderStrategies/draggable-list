@@ -33,6 +33,27 @@ function trigger (node, type, opts) {
   node.dispatchEvent(e)
 }
 
+test('works as a call with d3', function (t) {
+  var container = setup()
+  , mover = container.querySelector('ul li:nth-child(2)')
+
+  d3.selectAll('ul')
+    .call(List)
+
+  trigger(mover, 'mousedown')
+  trigger(mover, 'mousemove', {
+    clientX: 100,
+    clientY: 10000 // Slam it
+  })
+
+  t.equal(mover.className, 'placeholder', 'moved node has placeholder class')
+  t.equal(container.querySelector('ul').children[4].innerHTML, mover.innerHTML, 'mover now at index 4 of parent children')
+  t.equal(container.querySelector('ul li:nth-child(5)').style.top, '325px', 'traveler top set')
+
+  container.remove()
+  t.end()
+})
+
 test('allows inner elements to have click events', function (t) {
   var container = setup()
     , link = document.createElement('a')
