@@ -93,6 +93,11 @@ var List = function (container) {
     d3.select('.traveler', parent)
       .style('display', '') // Show it again
 
+    if (!target) {
+      // We don't have a place to drop this node that's in the ul
+      return
+    }
+
     var targetRect = target.getBoundingClientRect()
       , targetMiddle = target.offsetTop + targetRect.height / 2
       , mouseDelta = Math.abs(targetMiddle - (y + bb.height / 2))
