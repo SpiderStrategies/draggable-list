@@ -1,7 +1,7 @@
 {
-  "name": "scoreboard-draggable-list",
+  "name": "draggable-list",
   "version": "1.2.4",
-  "description": "Draggable/Sortable lists for Scoreboard",
+  "description": "Draggable/Sortable html lists using d3",
   "main": "index.js",
   "scripts": {
     "bundle": "browserify -r ./index.js:draggable-list -r d3 > example/bundle.js -d",
@@ -12,12 +12,13 @@
     "type": "git",
     "url": "https://github.com/SpiderStrategies/draggable-list.git"
   },
-  "author": "",
+  "keywords": ["d3", "draggable", "sortable", "sortable-list", "draggable-list", "dnd"],
+  "author": "Nathan Bowser <nathan.bowser@spiderstrategies.com",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/SpiderStrategies/scoreboard-draggable-list/issues"
+    "url": "https://github.com/SpiderStrategies/draggable-list/issues"
   },
-  "homepage": "https://github.com/SpiderStrategies/scoreboard-draggable-list",
+  "homepage": "https://github.com/SpiderStrategies/draggable-list",
   "devDependencies": {
     "browserify": "^13.0.0",
     "smokestack": "^3.4.1",
