@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bundle": "browserify -r ./index.js:draggable-list -r d3 > example/bundle.js -d",
-    "test": "browserify test/* | tap-closer| smokestack",
+    "test": "browserify test/* | double-tap smokestack",
     "watch": "watchify -r ./index.js:draggable-list -r d3 -o example/bundle.js -d"
   },
   "repository": {
@@ -28,8 +28,8 @@
   "homepage": "https://github.com/SpiderStrategies/draggable-list",
   "devDependencies": {
     "browserify": "^13.0.0",
+    "double-tap": "^1.0.2",
     "smokestack": "^3.4.1",
-    "tap-closer": "^1.0.0",
     "tape": "^4.4.0",
     "watchify": "^3.7.0"
   },
