@@ -1,5 +1,8 @@
 # draggable-list
 
+[![Build
+Status](https://travis-ci.org/SpiderStrategies/draggable-list.svg?branch=master)](https://travis-ci.org/SpiderStrategies/draggable-list)
+
 This is a component, built using d3, that will take a html `ul` and make it sortable using
 drag and drop.
 
