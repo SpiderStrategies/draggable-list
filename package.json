@@ -5,14 +5,21 @@
   "main": "index.js",
   "scripts": {
     "bundle": "browserify -r ./index.js:draggable-list -r d3 > example/bundle.js -d",
-    "test": "browserify test/* | smokestack",
+    "test": "browserify test/* | tap-closer| smokestack",
     "watch": "watchify -r ./index.js:draggable-list -r d3 -o example/bundle.js -d"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/SpiderStrategies/draggable-list.git"
   },
-  "keywords": ["d3", "draggable", "sortable", "sortable-list", "draggable-list", "dnd"],
+  "keywords": [
+    "d3",
+    "draggable",
+    "sortable",
+    "sortable-list",
+    "draggable-list",
+    "dnd"
+  ],
   "author": "Nathan Bowser <nathan.bowser@spiderstrategies.com",
   "license": "ISC",
   "bugs": {
@@ -22,6 +29,7 @@
   "devDependencies": {
     "browserify": "^13.0.0",
     "smokestack": "^3.4.1",
+    "tap-closer": "^1.0.0",
     "tape": "^4.4.0",
     "watchify": "^3.7.0"
   },
