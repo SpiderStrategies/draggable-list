@@ -9,6 +9,7 @@ function setup () {
   container.style.height = '700px'
   container.style['margin-top'] = '100px'
   container.style['margin-left'] = '50px'
+  container.style['width'] = '250px'
 
   container.innerHTML = '<ul>' +
                           '<li style="height: 50px;">KPI Dashboards</li>' +
@@ -108,13 +109,12 @@ test('creates the traveler', function (t) {
 
   setTimeout(function () {
     t.equal(container.querySelectorAll('ul li').length, 5, '5 total nodes') // normal number + 1
-
     var traveler = container.querySelector('ul li:nth-child(5)')
     t.equal(traveler.className, 'traveler', 'last node is the traveler')
     t.equal(traveler.style.position, 'absolute', 'traveler has absolute positioning')
     t.equal(traveler.style.top, '50px', 'traveler top set')
     t.equal(traveler.style.height, '50px', 'traveler height set')
-    t.equal(traveler.style.width, '701px', 'traveler width set')
+    t.equal(traveler.style.width, '210px', 'traveler width set')
     t.equal(traveler.innerHTML, 'Mayberry', 'node contents set')
 
     container.remove()
