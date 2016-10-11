@@ -1,4 +1,5 @@
-var d3 = require('d3')
+var d3drag = require('d3-drag')
+  , d3 = require('d3-selection')
   , EventEmitter = require('events').EventEmitter
   , util = require('util')
 
@@ -40,11 +41,11 @@ function dnd (container) {
              .classed('draggable-list', true)
     , self = this
     , parent = ul.node()
-    , drag = d3.behavior.drag()
+    , drag = d3drag.drag()
     , travelerTimeout = null
     , dragging = false
 
-  drag.on('dragstart', function () {
+  drag.on('start', function () {
     if (!leftClick(d3.event.sourceEvent)) {
       // Prevent dnd
       return
@@ -111,7 +112,7 @@ function dnd (container) {
     move(this, target)
   })
 
-  drag.on('dragend', function () {
+  drag.on('end', function () {
     if (!leftClick(d3.event.sourceEvent)) {
       return
     }
