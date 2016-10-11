@@ -83,19 +83,19 @@
       }, false)
     }
 
-    var List = require('draggable-list')
+    // var List = require('draggable-list')
 
-    var list = new List(document.querySelector('.draggable-list'))
-    list.on('move', function (node, newIndex, prevIndex) {
-      console.log(arguments)
-    })
+    // var list = new List(document.querySelector('.draggable-list'))
+    // list.on('move', function (node, newIndex, prevIndex) {
+    //   console.log(arguments)
+    // })
 
     // Or
-    // var draggable = require('draggable-list')
-    //   , d3 = require('d3')
+    var draggable = require('draggable-list')
+      , d3 = require('d3-selection')
 
-    // d3.selectAll('.draggable-list')
-    //   .call(draggable)
+    d3.selectAll('.draggable-list')
+      .call(draggable)
 
   })()
 
