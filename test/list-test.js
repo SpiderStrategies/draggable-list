@@ -1,6 +1,6 @@
 var test = require('tape').test
   , List = require('../')
-  , d3 = require('d3')
+  , d3 = require('d3-selection')
 
 function setup () {
   var container = document.createElement('div')
@@ -29,6 +29,7 @@ function trigger (node, type, opts) {
   for (var arg in opts) {
     e[arg] = opts[arg]
   }
+  e.view = window
   e.which = 1
   e.initEvent(type, true, true)
   node.dispatchEvent(e)
@@ -36,7 +37,7 @@ function trigger (node, type, opts) {
 
 test('works as a call with d3', function (t) {
   var container = setup()
-  , mover = container.querySelector('ul li:nth-child(2)')
+    , mover = container.querySelector('ul li:nth-child(2)')
 
   d3.selectAll('ul')
     .call(List)

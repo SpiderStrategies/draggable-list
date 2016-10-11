@@ -4,9 +4,9 @@
   "description": "Draggable/Sortable html lists using d3",
   "main": "index.js",
   "scripts": {
-    "bundle": "browserify -r ./index.js:draggable-list -r d3 > example/bundle.js -d",
+    "bundle": "browserify -r ./index.js:draggable-list > example/bundle.js -d",
     "test": "browserify test/* | double-tap smokestack",
-    "watch": "watchify -r ./index.js:draggable-list -r d3 -o example/bundle.js -d"
+    "watch": "watchify -r ./index.js:draggable-list -o example/bundle.js -d"
   },
   "repository": {
     "type": "git",
@@ -34,6 +34,7 @@
     "watchify": "^3.7.0"
   },
   "dependencies": {
-    "d3": "^3.5.14"
+    "d3-drag": "^1.0.1",
+    "d3-selection": "^1.0.2"
   }
 }
