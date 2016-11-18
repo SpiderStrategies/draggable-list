@@ -7,11 +7,6 @@ var clamp = function (value, min, max) {
   return Math.min(Math.max(value, min), max)
 }
 
-var leftClick = function (e) {
-  return (/^mouse/.test(e.type) && e.which === 1 && !e.ctrlKey) ||
-         /^touch/.test(e.type)
-}
-
 function animate (prevRect, target) {
   var currentRect = target.getBoundingClientRect()
     , ms = 250
@@ -46,11 +41,6 @@ function dnd (container) {
     , dragging = false
 
   drag.on('start', function () {
-    if (!leftClick(d3.event.sourceEvent)) {
-      // Prevent dnd
-      return
-    }
-
     var start = Array.prototype.slice.call(parent.children).indexOf(this)
       , node = this
 
@@ -69,10 +59,6 @@ function dnd (container) {
   })
 
   drag.on('drag', function () {
-    if (!leftClick(d3.event.sourceEvent)) {
-      return
-    }
-
     if (!dragging) {
       dndstart(this, parent)
       clearTimeout(travelerTimeout)
@@ -113,10 +99,6 @@ function dnd (container) {
   })
 
   drag.on('end', function () {
-    if (!leftClick(d3.event.sourceEvent)) {
-      return
-    }
-
     if (travelerTimeout) {
       window.clearTimeout(travelerTimeout)
     }
