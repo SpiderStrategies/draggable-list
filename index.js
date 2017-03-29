@@ -38,8 +38,21 @@ function dnd (container) {
     , parent = ul.node()
     , drag = d3drag.drag()
                    .filter(function () {
-                     // prevent right clicks and dnd on elements w/ class `draggable-list-nodrag`
-                     return !d3.event.button && !d3.select(d3.event.target).classed('draggable-list-nodrag')
+                     var nodrag = d3.select(d3.event.target).classed('draggable-list-nodrag') || // check target node
+                                  d3.select(this).classed('draggable-list-nodrag') // check `li` element
+                       , p = d3.event.target.parentNode
+
+                     // walk tree between target and list element seeing if there is a nodrag along the way
+                     while (d3.event.target !== this && p && p !== this && !nodrag) {
+                       if (d3.select(p).classed('draggable-list-nodrag')) {
+                         nodrag = true
+                       }
+                       p = p.parentNode
+                     }
+
+                     return !d3.event.button && // prevent right clicks
+                            !nodrag
+
                    })
     , travelerTimeout = null
     , dragging = false
