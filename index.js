@@ -203,6 +203,10 @@ function dnd (container) {
 
   ul.selectAll('ul.draggable-list > li')
     .call(drag)
+    .filter(function (d, i, all) {
+      return all.length === 1
+    })
+    .classed('draggable-list-nodrag', true)
 }
 
 var List = function (selection) {

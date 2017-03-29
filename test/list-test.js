@@ -56,6 +56,18 @@ test('works as a call with d3', function (t) {
   t.end()
 })
 
+test('prevent dnd if only one li', function (t) {
+  var container = document.createElement('div')
+  container.innerHTML = '<ul>' +
+                          '<li style="height: 50px;">KPI Dashboards</li>' +
+                        '</ul>'
+
+  var ul = container.querySelector('ul')
+    , list = new List(ul)
+  t.ok(ul.querySelector('li').className, 'draggable-list-nodrag', 'nodrag class set')
+  t.end()
+})
+
 test('allows inner elements to have click events', function (t) {
   var container = setup()
     , link = document.createElement('a')
