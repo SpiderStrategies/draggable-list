@@ -78,6 +78,33 @@ test('allows inner elements to have click events', function (t) {
   trigger(link, 'click')
 })
 
+test('inner elements can prevent dnd', function (t) {
+  var container = setup()
+    , nodrag = document.createElement('span')
+    , li = container.querySelector('ul li:nth-child(2)')
+
+  nodrag.className = 'draggable-list-nodrag'
+  nodrag.innerHTML = 'cannot drag this span'
+
+  li.appendChild(nodrag)
+
+  var ul = container.querySelector('ul')
+    , list = new List(ul)
+
+  t.ok(!d3.select(ul).classed('is-dragging'), 'ul does not have `is-dragging` css class')
+
+  trigger(nodrag, 'mousedown')
+  trigger(nodrag, 'mousemove', {
+    clientX: 100,
+    clientY: 100
+  })
+  t.ok(!d3.select(ul).classed('is-dragging'), 'ul still does not have `is-dragging` css class')
+  trigger(nodrag, 'mouseup')
+  trigger(nodrag, 'click')
+  container.remove()
+  t.end()
+})
+
 test('applies dragging class during drag', function (t) {
   var container = setup()
     , ul = container.querySelector('ul')

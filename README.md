@@ -31,6 +31,8 @@ d3.selectAll('.draggable-list')
   .call(draggable)
 ```
 
+Elements can set a class of `draggable-list-nodrag` to prevent dnd operations on that element.
+
 ## Installation
 
 ```

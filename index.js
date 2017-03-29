@@ -37,6 +37,10 @@ function dnd (container) {
     , self = this
     , parent = ul.node()
     , drag = d3drag.drag()
+                   .filter(function () {
+                     // prevent right clicks and dnd on elements w/ class `draggable-list-nodrag`
+                     return !d3.event.button && !d3.select(d3.event.target).classed('draggable-list-nodrag')
+                   })
     , travelerTimeout = null
     , dragging = false
 
