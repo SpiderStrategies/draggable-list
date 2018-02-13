@@ -85,14 +85,17 @@ function dnd (container) {
     var bb = this.getBoundingClientRect()
       , containerBottom = parent.offsetHeight + parent.scrollTop
       , lowerBound = containerBottom - bb.height / 2
-      , y = clamp(d3.event.y - bb.height / 2, -(bb.height / 2), lowerBound) // Top of the moving node
+      , top = clamp(d3.event.y - bb.height / 2, -(bb.height / 2), lowerBound) // Top of the moving node
+      , y = top + parent.getBoundingClientRect().top + bb.height / 2
+      , x = Math.ceil(bb.left) // Round up to ensure we're inside of the `li` node in case a browser rounds down
+                              // the `elementFromPoint` call.
 
     // Reposition the traveling node
     d3.select('.traveler', parent)
-      .style('top', y + 'px')
+      .style('top', top + 'px')
       .style('display', 'none') // Hide it so we can get the node under the traveler
 
-    var target = document.elementFromPoint(bb.left, y + parent.getBoundingClientRect().top + bb.height / 2)
+    var target = document.elementFromPoint(x, y)
 
     d3.select('.traveler', parent)
       .style('display', '') // Show it again
@@ -104,7 +107,7 @@ function dnd (container) {
 
     var targetRect = target.getBoundingClientRect()
       , targetMiddle = target.offsetTop + targetRect.height / 2
-      , mouseDelta = Math.abs(targetMiddle - (y + bb.height / 2))
+      , mouseDelta = Math.abs(targetMiddle - (top + bb.height / 2))
       , mouseOutside = d3.event.y < 0 || d3.event.y > containerBottom
 
     if (mouseDelta / targetMiddle > .1 && !mouseOutside) {
