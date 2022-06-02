@@ -37,20 +37,20 @@ function dnd (container) {
     , self = this
     , parent = ul.node()
     , drag = d3drag.drag()
-                   .filter(function () {
-                     var nodrag = d3.select(d3.event.target).classed('draggable-list-nodrag') || // check target node
+                   .filter(function (e) {
+                     var nodrag = d3.select(e.target).classed('draggable-list-nodrag') || // check target node
                                   d3.select(this).classed('draggable-list-nodrag') // check `li` element
-                       , p = d3.event.target.parentNode
+                       , p = e.target.parentNode
 
                      // walk tree between target and list element seeing if there is a nodrag along the way
-                     while (d3.event.target !== this && p && p !== this && !nodrag) {
+                     while (e.target !== this && p && p !== this && !nodrag) {
                        if (d3.select(p).classed('draggable-list-nodrag')) {
                          nodrag = true
                        }
                        p = p.parentNode
                      }
 
-                     return !d3.event.button && // prevent right clicks
+                     return !e.button && // prevent right clicks
                             !nodrag
 
                    })
@@ -65,9 +65,9 @@ function dnd (container) {
     travelerTimeout = setTimeout(dndstart.bind(null, this, parent), 300)
 
     d3.select(window)
-      .on('keydown.dnd-escape', function () {
+      .on('keydown.dnd-escape', function (e) {
          // If it's the escape, then cancel
-        if (d3.event.keyCode === 27) {
+        if (e.keyCode === 27) {
           self.emit('dndcancel')
           move(node, parent.children[start])
           cleanup(node)
@@ -75,7 +75,7 @@ function dnd (container) {
       })
   })
 
-  drag.on('drag', function () {
+  drag.on('drag', function (e) {
     if (!dragging) {
       dndstart(this, parent)
       clearTimeout(travelerTimeout)
@@ -85,11 +85,10 @@ function dnd (container) {
     var bb = this.getBoundingClientRect()
       , containerBottom = parent.offsetHeight + parent.scrollTop
       , lowerBound = containerBottom - bb.height / 2
-      , top = clamp(d3.event.y - bb.height / 2, -(bb.height / 2), lowerBound) // Top of the moving node
+      , top = clamp(e.y - bb.height / 2, -(bb.height / 2), lowerBound) // Top of the moving node
       , y = top + parent.getBoundingClientRect().top + bb.height / 2
       , x = Math.ceil(bb.left) // Round up to ensure we're inside of the `li` node in case a browser rounds down
                               // the `elementFromPoint` call.
-
     // Reposition the traveling node
     d3.select('.traveler', parent)
       .style('top', top + 'px')
@@ -108,7 +107,7 @@ function dnd (container) {
     var targetRect = target.getBoundingClientRect()
       , targetMiddle = target.offsetTop + targetRect.height / 2
       , mouseDelta = Math.abs(targetMiddle - (top + bb.height / 2))
-      , mouseOutside = d3.event.y < 0 || d3.event.y > containerBottom
+      , mouseOutside = e.y < 0 || e.y > containerBottom
 
     if (mouseDelta / targetMiddle > .1 && !mouseOutside) {
       // Too far away, carry on
