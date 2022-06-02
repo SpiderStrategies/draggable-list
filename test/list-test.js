@@ -285,7 +285,10 @@ test('fires dnd events', function (t) {
   })
 
   trigger(li, 'mousedown')
-  trigger(li, 'mousemove')
+  trigger(li, 'mousemove', {
+    clientX: 10,
+    clientY: 10
+  })
   trigger(window, 'keydown', {
     keyCode: 27
   })
