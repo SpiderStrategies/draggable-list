@@ -1,7 +1,7 @@
-var d3drag = require('d3-drag')
-  , d3 = require('d3-selection')
-  , EventEmitter = require('events').EventEmitter
-  , util = require('util')
+import * as d3drag from 'd3-drag'
+import * as d3 from 'd3-selection'
+import { EventEmitter } from 'events'
+import util from 'util'
 
 var clamp = function (value, min, max) {
   return Math.min(Math.max(value, min), max)
@@ -225,4 +225,4 @@ var List = function (selection) {
 
 util.inherits(List, EventEmitter)
 
-module.exports = List
+export default List

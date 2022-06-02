@@ -1,6 +1,6 @@
-var test = require('tape').test
-  , List = require('../')
-  , d3 = require('d3-selection')
+import { test } from 'tape'
+import List from '../'
+import * as d3 from 'd3-selection'
 
 function setup () {
   var container = document.createElement('div')
