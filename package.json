@@ -1,6 +1,6 @@
 {
   "name": "draggable-list",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "Draggable/Sortable html lists using d3",
   "main": "index.js",
   "scripts": {
