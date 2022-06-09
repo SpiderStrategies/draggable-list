@@ -2,6 +2,7 @@ import * as d3drag from 'd3-drag'
 import * as d3 from 'd3-selection'
 import { EventEmitter } from 'events'
 import util from 'util'
+let stopScrolling = true
 
 var clamp = function (value, min, max) {
   return Math.min(Math.max(value, min), max)
@@ -30,8 +31,8 @@ function animate (prevRect, target) {
   }, ms)
 }
 
-function dnd (container) {
-  var ul = d3.select(container)
+function dnd (list, scrollingContainer) {
+  var ul = d3.select(list)
              .style('position', 'relative') // needed for dnd to work
              .classed('draggable-list', true)
     , self = this
@@ -98,6 +99,27 @@ function dnd (container) {
 
     d3.select('.traveler', parent)
       .style('display', '') // Show it again
+
+    // If a scrollingContainer is present, allow the list to scroll up/down
+    // when dragging an item to the top or bottom of the scroll container
+    if (scrollingContainer) {
+      let scrollUp = top <= scrollingContainer.scrollTop
+      let scrollDown = top + bb.height >= scrollingContainer.scrollTop + scrollingContainer.offsetHeight
+
+      if (scrollUp) {
+        scroll(-1) // Scroll up
+        stopScrolling = false
+      }
+
+      if (scrollDown) {
+        scroll(1) // Scroll down
+        stopScrolling = false
+      }
+
+      if (!scrollUp && !scrollDown) {
+        stopScrolling = true
+      }
+    }
 
     if (!target) {
       // We don't have a place to drop this node that's in the ul
@@ -166,6 +188,15 @@ function dnd (container) {
     }
   }
 
+  function scroll (step) {
+    let scrollSpeed = 100
+    let scrollY = scrollingContainer.scrollTop
+    scrollingContainer.scrollTop = scrollY + step
+    if (!stopScrolling && dragging) {
+      setTimeout(function () { scroll(step) }, scrollSpeed)
+    }
+  }
+
   function dndstart (source, parent) {
     if (d3.select('.traveler', parent).size()) {
       // Already created
@@ -211,9 +242,9 @@ function dnd (container) {
     .classed('draggable-list-nodrag', true)
 }
 
-var List = function (selection) {
+var List = function (selection, scrollingContainer) {
   if (this instanceof List) {
-    dnd.call(this, selection)
+    dnd.call(this, selection, scrollingContainer)
     return this
   } else if (selection instanceof d3.selection) {
     selection.each(function () {
