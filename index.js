@@ -30,7 +30,7 @@ function animate (prevRect, target) {
   }, ms)
 }
 
-function dnd (container) {
+function dnd (container, options) {
   var ul = d3.select(container)
              .style('position', 'relative') // needed for dnd to work
              .classed('draggable-list', true)
@@ -56,6 +56,8 @@ function dnd (container) {
                    })
     , travelerTimeout = null
     , dragging = false
+    , scrollEl = options.scrollEl
+    , stopScrolling = true
 
   drag.on('start', function () {
     var start = Array.prototype.slice.call(parent.children).indexOf(this)
@@ -98,6 +100,27 @@ function dnd (container) {
 
     d3.select('.traveler', parent)
       .style('display', '') // Show it again
+
+    // If a scrolling container is present, allow the list to scroll up/down
+    // when dragging an item to the top or bottom of the scroll container
+    if (options && scrollEl) {
+      let scrollUp = top <= scrollEl.scrollTop
+      let scrollDown = top + bb.height >= scrollEl.scrollTop + scrollEl.offsetHeight
+
+      if (scrollUp) {
+        scroll(-1) // Scroll up
+        stopScrolling = false
+      }
+
+      if (scrollDown) {
+        scroll(1) // Scroll down
+        stopScrolling = false
+      }
+
+      if (!scrollUp && !scrollDown) {
+        stopScrolling = true
+      }
+    }
 
     if (!target) {
       // We don't have a place to drop this node that's in the ul
@@ -166,6 +189,15 @@ function dnd (container) {
     }
   }
 
+  function scroll (step) {
+    let scrollSpeed = 100
+    let scrollY = scrollEl.scrollTop
+    scrollEl.scrollTop = scrollY + step
+    if (!stopScrolling && dragging) {
+      setTimeout(function () { scroll(step) }, scrollSpeed)
+    }
+  }
+
   function dndstart (source, parent) {
     if (d3.select('.traveler', parent).size()) {
       // Already created
@@ -211,9 +243,18 @@ function dnd (container) {
     .classed('draggable-list-nodrag', true)
 }
 
-var List = function (selection) {
+/**
+ * @constructs
+ *
+ * @param {Object} options
+ *
+ * @param {Object} [options.scrollEl] Element containing the list that allows
+ * the list to scroll while dragging.
+ *
+ */
+var List = function (selection, options) {
   if (this instanceof List) {
-    dnd.call(this, selection)
+    dnd.call(this, selection, options)
     return this
   } else if (selection instanceof d3.selection) {
     selection.each(function () {
