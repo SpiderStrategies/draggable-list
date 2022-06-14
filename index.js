@@ -56,7 +56,7 @@ function dnd (container, options) {
                    })
     , travelerTimeout = null
     , dragging = false
-    , scroller = options.scroller
+    , scrollEl = options.scrollEl
     , stopScrolling = true
 
   drag.on('start', function () {
@@ -103,9 +103,9 @@ function dnd (container, options) {
 
     // If a scrolling container is present, allow the list to scroll up/down
     // when dragging an item to the top or bottom of the scroll container
-    if (options && scroller) {
-      let scrollUp = top <= scroller.scrollTop
-      let scrollDown = top + bb.height >= scroller.scrollTop + scroller.offsetHeight
+    if (options && scrollEl) {
+      let scrollUp = top <= scrollEl.scrollTop
+      let scrollDown = top + bb.height >= scrollEl.scrollTop + scrollEl.offsetHeight
 
       if (scrollUp) {
         scroll(-1) // Scroll up
@@ -191,8 +191,8 @@ function dnd (container, options) {
 
   function scroll (step) {
     let scrollSpeed = 100
-    let scrollY = scroller.scrollTop
-    scroller.scrollTop = scrollY + step
+    let scrollY = scrollEl.scrollTop
+    scrollEl.scrollTop = scrollY + step
     if (!stopScrolling && dragging) {
       setTimeout(function () { scroll(step) }, scrollSpeed)
     }
@@ -248,7 +248,7 @@ function dnd (container, options) {
  *
  * @param {Object} options
  *
- * @param {Object} [options.scroller] Element containing the list that allows
+ * @param {Object} [options.scrollEl] Element containing the list that allows
  * the list to scroll while dragging.
  *
  */
