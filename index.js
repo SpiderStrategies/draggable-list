@@ -30,7 +30,7 @@ function animate (prevRect, target) {
   }, ms)
 }
 
-function dnd (container, options) {
+function dnd (container, options = {}) {
   var ul = d3.select(container)
              .style('position', 'relative') // needed for dnd to work
              .classed('draggable-list', true)
@@ -103,7 +103,7 @@ function dnd (container, options) {
 
     // If a scrolling container is present, allow the list to scroll up/down
     // when dragging an item to the top or bottom of the scroll container
-    if (options && scrollEl) {
+    if (scrollEl) {
       let scrollUp = top <= scrollEl.scrollTop
       let scrollDown = top + bb.height >= scrollEl.scrollTop + scrollEl.offsetHeight
 
