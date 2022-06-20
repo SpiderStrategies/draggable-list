@@ -57,7 +57,7 @@ function dnd (container, options = {}) {
     , travelerTimeout = null
     , dragging = false
     , scrollEl = options.scrollEl
-    , stopScrolling = true
+    , _autoscrollTimeout
 
   drag.on('start', function () {
     var start = Array.prototype.slice.call(parent.children).indexOf(this)
@@ -71,7 +71,7 @@ function dnd (container, options = {}) {
          // If it's the escape, then cancel
         if (d3.event.keyCode === 27) {
           self.emit('dndcancel')
-          move(node, parent.children[start])
+          rearrange(node, parent.children[start])
           cleanup(node)
         }
       })
@@ -84,61 +84,8 @@ function dnd (container, options = {}) {
       dragging = true
     }
 
-    var bb = this.getBoundingClientRect()
-      , containerBottom = parent.offsetHeight + parent.scrollTop
-      , lowerBound = containerBottom - bb.height / 2
-      , top = clamp(d3.event.y - bb.height / 2, -(bb.height / 2), lowerBound) // Top of the moving node
-      , y = top + parent.getBoundingClientRect().top + bb.height / 2
-      , x = Math.ceil(bb.left) // Round up to ensure we're inside of the `li` node in case a browser rounds down
-                              // the `elementFromPoint` call.
-
-    // Reposition the traveling node
-    d3.select('.traveler', parent)
-      .style('top', top + 'px')
-      .style('display', 'none') // Hide it so we can get the node under the traveler
-
-    var target = document.elementFromPoint(x, y)
-
-    d3.select('.traveler', parent)
-      .style('display', '') // Show it again
-
-    // If a scrolling container is present, allow the list to scroll up/down
-    // when dragging an item to the top or bottom of the scroll container
-    if (scrollEl) {
-      let scrollUp = top <= scrollEl.scrollTop
-      let scrollDown = top + bb.height >= scrollEl.scrollTop + scrollEl.offsetHeight
-
-      if (scrollUp) {
-        scroll(-1) // Scroll up
-        stopScrolling = false
-      }
-
-      if (scrollDown) {
-        scroll(1) // Scroll down
-        stopScrolling = false
-      }
-
-      if (!scrollUp && !scrollDown) {
-        stopScrolling = true
-      }
-    }
-
-    if (!target) {
-      // We don't have a place to drop this node that's in the ul
-      return
-    }
-
-    var targetRect = target.getBoundingClientRect()
-      , targetMiddle = target.offsetTop + targetRect.height / 2
-      , mouseDelta = Math.abs(targetMiddle - (top + bb.height / 2))
-      , mouseOutside = d3.event.y < 0 || d3.event.y > containerBottom
-
-    if (mouseDelta / targetMiddle > .1 && !mouseOutside) {
-      // Too far away, carry on
-      return
-    }
-
-    move(this, target)
+    _autoscroll(this, d3.event.y)
+    _move(this, d3.event.y)
   })
 
   drag.on('end', function () {
@@ -156,7 +103,81 @@ function dnd (container, options = {}) {
     self.emit('dndstop')
   })
 
-  function move (node, target) {
+  function _autoscroll (node, y) {
+    if (_autoscrollTimeout) {
+      // Prevent race conditions
+      window.clearTimeout(_autoscrollTimeout)
+      _autoscrollTimeout = null
+    }
+
+    if (!dragging || !scrollEl) {
+      return
+    }
+
+    let threshold = 30
+      , pixels = 10
+
+    if (y - threshold <= scrollEl.scrollTop) {
+      scroll(-pixels) // Scroll up
+    }
+
+    if (y + threshold >= scrollEl.scrollTop + scrollEl.offsetHeight) {
+      scroll(pixels) // Scroll down
+    }
+
+    function scroll (pixels) {
+      scrollEl.scrollTop += pixels
+      y += pixels
+
+      _move(node, y)
+
+      _autoscrollTimeout = setTimeout(function () {
+        _autoscroll(node, y)
+      }, 10)
+    }
+  }
+
+  function _move (node, y) {
+    var bb = node.getBoundingClientRect()
+      , containerBottom = parent.offsetHeight + parent.scrollTop
+      , lowerBound = containerBottom - bb.height / 2
+      , top = clamp(y - bb.height / 2, -(bb.height / 2), lowerBound) // Top of the moving node
+      , y = top + parent.getBoundingClientRect().top + bb.height / 2
+      , x = Math.ceil(bb.left) // Round up to ensure we're inside of the `li` node in case a browser rounds down
+                              // the `elementFromPoint` call.
+
+    // Reposition the traveling node
+    d3.select('.traveler', parent)
+      .style('top', top + 'px')
+      .style('display', 'none') // Hide it so we can get the node under the traveler
+
+    var target = document.elementFromPoint(x, y)
+
+    d3.select('.traveler', parent)
+      .style('display', '') // Show it again
+
+    if (!target) {
+      // We don't have a place to drop this node that's in the ul
+      return
+    }
+
+    var targetRect = target.getBoundingClientRect()
+      , targetMiddle = target.offsetTop + targetRect.height / 2
+      , mouseDelta = Math.abs(targetMiddle - (top + bb.height / 2))
+      , mouseOutside = y < 0 || y > containerBottom
+
+    if (mouseDelta / targetMiddle > .1 && !mouseOutside) {
+      // Too far away, carry on
+      return
+    }
+
+    rearrange(node, target)
+  }
+
+  /*
+   * Rearranges the nodes
+   */
+  function rearrange (node, target) {
     var currentIndex = Array.prototype.slice.call(parent.children).indexOf(node)
       , targetIndex = Array.prototype.slice.call(parent.children).indexOf(target)
       , bb = node.getBoundingClientRect()
@@ -187,15 +208,6 @@ function dnd (container, options = {}) {
       parent.insertBefore(node, target.nextSibling)
       animate(bb, node)
       animate(targetBb, target)
-    }
-  }
-
-  function scroll (step) {
-    let scrollSpeed = 100
-    let scrollY = scrollEl.scrollTop
-    scrollEl.scrollTop = scrollY + step
-    if (!stopScrolling && dragging) {
-      setTimeout(function () { scroll(step) }, scrollSpeed)
     }
   }
 
