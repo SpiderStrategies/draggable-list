@@ -259,7 +259,7 @@ var List = function (selection, options) {
     return this
   } else if (selection instanceof d3.selection) {
     selection.each(function () {
-      dnd.call(new EventEmitter, this)
+      dnd.call(new EventEmitter, this, options)
     })
   }
 }
