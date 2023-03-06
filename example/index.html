@@ -51,6 +51,10 @@
         opacity: .2;
       }
 
+      ul.draggable-list li.draggable-list-lock {
+        background-color: rgb(255, 99, 71, .7);
+      }
+
     </style>
   </head>
   <body>
@@ -60,7 +64,7 @@
               KPI Dashboards
               <span class="toggle">&#x1f608;</span>
           </li>
-          <li>Mayberry</li>
+          <li class="draggable-list-lock">Locked</li>
           <li class="alert">
             Yummygum
             <button class="draggable-list-nodrag" onclick="alert('heyo');">Click me!</button>
@@ -68,7 +72,7 @@
           <li class="draggable-list-nodrag"><a href="http://spiderstrategies.com">Spider Strategies</a></li>
           <li>
             <div class="draggable-list-nodrag">
-              <span class="toggle">no-drag</span>
+              <span class="toggle">no-drag-text</span>
             </div>
           </li>
         </ul>

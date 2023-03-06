@@ -7,26 +7,31 @@ const clamp = function (value, min, max) {
   return Math.min(Math.max(value, min), max)
 }
 
-function animate (prevRect, target) {
-  let currentRect = target.getBoundingClientRect()
+function animate (startingBB, node) {
+  let endingBB = node.getBoundingClientRect()
     , ms = 250
 
-  d3.select(target)
+  if (startingBB.top == endingBB.top) {
+    // Same location, exit early
+    return
+  }
+
+  d3.select(node)
     .style('transition', 'none')
-    .style('transform', 'translate(0px,'+ (prevRect.top - currentRect.top) + 'px)')
+    .style('transform', 'translate(0px,'+ (startingBB.top - endingBB.top) + 'px)')
 
-  target.offsetWidth // trigger reflow
+  node.offsetWidth // trigger reflow
 
-  d3.select(target)
+  d3.select(node)
     .style('transition', 'transform ' + ms + 'ms')
     .style('transform', 'translate(0,0)')
 
-  clearTimeout(target.animated)
-  target.animated = setTimeout(function () {
-    d3.select(target)
+  clearTimeout(node.animated)
+  node.animated = setTimeout(function () {
+    d3.select(node)
       .style('transition', '')
       .style('transform', '')
-    target.animated = false
+    node.animated = false
   }, ms)
 }
 
@@ -176,16 +181,15 @@ function dnd (container, options = {}) {
     rearrange(node, target)
   }
 
-  /*
-   * Actually performs the operation that moves the nodes in the DOM
-   */
-  function _moveAndAnimate (node, referenceNode, target) {
-    let bb = node.getBoundingClientRect()
-      , targetBb = target.getBoundingClientRect()
+  function lockedSort (objects) {
+    const locked = objects.filter(obj => obj.locked)
+    const all = objects.filter(obj => !obj.locked) // Start w/ the sorted list of unlocked
 
-    parent.insertBefore(node, referenceNode)
-    animate(bb, node)
-    animate(targetBb, target)
+    locked.forEach(obj => {
+      all.splice(obj.idx, 0, obj)
+    })
+
+    return all
   }
 
   /*
@@ -195,6 +199,17 @@ function dnd (container, options = {}) {
     let nodes = Array.prototype.slice.call(parent.children)
       , currentIndex = nodes.indexOf(node)
       , targetIndex = nodes.indexOf(target)
+      , state = nodes.map((node, idx) => {
+        let locked = node.classList.contains('draggable-list-lock')
+        return {
+          node,
+          idx,
+          locked,
+          bb: node.getBoundingClientRect()
+        }
+      })
+      , unlocked = state.filter(obj => obj.unlocked)
+      , lockedIndexes = state.filter(obj => obj.locked).map(obj => obj.idx)
 
     if (target.animated) {
       // already working
@@ -211,13 +226,26 @@ function dnd (container, options = {}) {
       return
     }
 
-    if (currentIndex > targetIndex) {
-      // Sliding current node up
-      _moveAndAnimate(node, target, target)
-    } else if (currentIndex < targetIndex) {
-      // slide current node down
-      _moveAndAnimate(node, target.nextSibling, target)
+    if (lockedIndexes.includes(targetIndex)) {
+      // Not a valid location
+      return
     }
+
+    // Move this node to its new location
+    state.splice(targetIndex, 0, state.splice(currentIndex, 1)[0])
+
+    // Sort the entire state to make sure locked nodes maintain their order
+    let items = lockedSort(state)
+
+    items.forEach(obj => {
+      // Append them to the container in the correct order
+      container.appendChild(obj.node)
+    })
+
+    // Once the DOM nodes are in the correct order, run the animation
+    items.forEach(obj => {
+      animate(obj.bb, obj.node)
+    })
   }
 
   function dndstart (source, parent) {
