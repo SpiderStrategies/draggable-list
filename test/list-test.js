@@ -1,39 +1,7 @@
 import { test } from 'tape'
 import List from '../'
 import * as d3 from 'd3-selection'
-
-function setup () {
-  var container = document.createElement('div')
-
-  container.className = 'container'
-  container.style.height = '700px'
-  container.style['margin-top'] = '100px'
-  container.style['margin-left'] = '50px'
-  container.style['width'] = '250px'
-
-  container.innerHTML = '<ul>' +
-                          '<li style="height: 50px;">KPI Dashboards</li>' +
-                          '<li style="height: 50px;">Mayberry</li>' +
-                          '<li style="height: 200px;">Yummygum</li>' +
-                          '<li style="height: 50px;">Spider Strategies</li>' +
-                        '</ul>'
-
-  document.body.appendChild(container)
-
-  return container
-}
-
-function trigger (node, type, opts) {
-  opts = opts || {}
-  var e = document.createEvent('Event')
-  for (var arg in opts) {
-    e[arg] = opts[arg]
-  }
-  e.view = window
-  e.which = 1
-  e.initEvent(type, true, true)
-  node.dispatchEvent(e)
-}
+import {setup, trigger} from './test-util.js'
 
 test('works as a call with d3', function (t) {
   var container = setup()

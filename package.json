@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bundle": "browserify -p esmify -r ./index.js:draggable-list -r d3-selection > example/bundle.js -d",
-    "test": "browserify -p esmify test/* | double-tap smokestack",
+    "test": "browserify -p esmify test/*-test.js | double-tap smokestack",
     "watch": "watchify -p esmify -r ./index.js:draggable-list -r d3-selection -o example/bundle.js -d"
   },
   "repository": {
