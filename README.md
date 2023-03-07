@@ -33,6 +33,8 @@ d3.selectAll('.draggable-list')
 
 Elements can set a class of `draggable-list-nodrag` to prevent dnd operations on that element.
 
+Elements can set a class of `draggable-list-lock` so the list item index is always maintained.
+
 ## Installation
 
 ```

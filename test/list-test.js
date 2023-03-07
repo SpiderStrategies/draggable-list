@@ -1,39 +1,7 @@
 import { test } from 'tape'
 import List from '../'
 import * as d3 from 'd3-selection'
-
-function setup () {
-  var container = document.createElement('div')
-
-  container.className = 'container'
-  container.style.height = '700px'
-  container.style['margin-top'] = '100px'
-  container.style['margin-left'] = '50px'
-  container.style['width'] = '250px'
-
-  container.innerHTML = '<ul>' +
-                          '<li style="height: 50px;">KPI Dashboards</li>' +
-                          '<li style="height: 50px;">Mayberry</li>' +
-                          '<li style="height: 200px;">Yummygum</li>' +
-                          '<li style="height: 50px;">Spider Strategies</li>' +
-                        '</ul>'
-
-  document.body.appendChild(container)
-
-  return container
-}
-
-function trigger (node, type, opts) {
-  opts = opts || {}
-  var e = document.createEvent('Event')
-  for (var arg in opts) {
-    e[arg] = opts[arg]
-  }
-  e.view = window
-  e.which = 1
-  e.initEvent(type, true, true)
-  node.dispatchEvent(e)
-}
+import {setup, trigger} from './test-util.js'
 
 test('works as a call with d3', function (t) {
   var container = setup()
@@ -52,6 +20,7 @@ test('works as a call with d3', function (t) {
   t.equal(container.querySelector('ul').children[4].innerHTML, mover.innerHTML, 'mover now at index 4 of parent children')
   t.equal(container.querySelector('ul li:nth-child(5)').style.top, '325px', 'traveler top set')
 
+  trigger(mover, 'mouseup')
   container.remove()
   t.end()
 })
@@ -65,6 +34,7 @@ test('prevent dnd if only one li', function (t) {
   var ul = container.querySelector('ul')
     , list = new List(ul)
   t.ok(ul.querySelector('li').className, 'draggable-list-nodrag', 'nodrag class set')
+  container.remove()
   t.end()
 })
 
@@ -208,6 +178,7 @@ test('creates the traveler', function (t) {
     t.equal(traveler.style.height, '50px', 'traveler height set')
     t.equal(traveler.style.width, '210px', 'traveler width set')
     t.equal(traveler.innerHTML, 'Mayberry', 'node contents set')
+    trigger(mover, 'mouseup')
 
     container.remove()
     t.end()
@@ -237,12 +208,14 @@ test('moves a node within the list\'s bounds', function (t) {
       clientX: 100,
       clientY: -10000 // unslam it
     })
+
     t.equal(container.querySelector('ul').children[0].innerHTML, mover.innerHTML, 'mover now at index 0 of parent children')
     t.equal(container.querySelector('ul li:nth-child(5)').style.top, '-25px', 'traveler top set')
 
+    trigger(mover, 'mouseup')
     container.remove()
     t.end()
-  }, 300)
+  }, 100)
 })
 
 test('fires move events', function (t) {
