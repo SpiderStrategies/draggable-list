@@ -38,6 +38,22 @@ test('prevent dnd if only one li', function (t) {
   t.end()
 })
 
+test('prevent dnd if only one unlocked li', function (t) {
+  var container = document.createElement('div')
+  container.innerHTML = '<ul>' +
+                          '<li style="height: 50px;">KPI Dashboards</li>' +
+                          '<li style="height: 50px;" class="draggable-list-lock">KPI Dashboards</li>' +
+                          '<li style="height: 50px;" class="draggable-list-lock">KPI Dashboards</li>' +
+                        '</ul>'
+
+  var ul = container.querySelector('ul')
+    , list = new List(ul)
+    , nodrags = ul.querySelectorAll('li.draggable-list-nodrag:not(.draggable-list-lock)')
+  t.equal(nodrags.length, 1, 'nodrag class set')
+  container.remove()
+  t.end()
+})
+
 test('allows inner elements to have click events', function (t) {
   var container = setup()
     , link = document.createElement('a')
