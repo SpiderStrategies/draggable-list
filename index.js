@@ -285,7 +285,7 @@ function dnd (container, options = {}) {
     d3.selectAll('.traveler', parent).remove()
   }
 
-  ul.selectAll('ul.draggable-list > li:not(.draggable-list-lock)')
+  ul.selectChildren('li:not(.draggable-list-lock)')
     .call(drag)
     .filter(function (d, i, all) {
       return all.length === 1
