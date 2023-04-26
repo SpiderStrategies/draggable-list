@@ -40,7 +40,6 @@ function dnd (container, options = {}) {
              .style('position', 'relative') // needed for dnd to work
              .classed('draggable-list', true)
     , self = this
-    , parent = ul.node()
     , drag = d3drag.drag()
                    .filter(function (e) {
                      let nodrag = d3.select(e.target).classed('draggable-list-nodrag') || // check target node
@@ -67,18 +66,18 @@ function dnd (container, options = {}) {
     , _autoscrollTimeout
 
   drag.on('start', function () {
-    let start = Array.prototype.slice.call(parent.children).indexOf(this)
+    let start = Array.prototype.slice.call(container.children).indexOf(this)
       , node = this
 
     d3.select(this).property('__startIndex__', start)
-    travelerTimeout = setTimeout(dndstart.bind(null, this, parent), 300)
+    travelerTimeout = setTimeout(dndstart.bind(null, this), 300)
 
     d3.select(window)
       .on('keydown.dnd-escape', function (e) {
          // If it's the escape, then cancel
         if (e.keyCode === 27) {
           self.emit('dndcancel')
-          rearrange(node, parent.children[start])
+          rearrange(node, container.children[start])
           cleanup(node)
         }
       })
@@ -86,7 +85,7 @@ function dnd (container, options = {}) {
 
   drag.on('drag', function (e) {
     if (!dragging) {
-      dndstart(this, parent)
+      dndstart(this)
       clearTimeout(travelerTimeout)
       dragging = true
     }
@@ -101,7 +100,7 @@ function dnd (container, options = {}) {
     }
 
     let startIndex = d3.select(this).property('__startIndex__')
-      , newIndex = Array.prototype.slice.call(parent.children).indexOf(this)
+      , newIndex = Array.prototype.slice.call(container.children).indexOf(this)
 
     if (newIndex !== startIndex) {
       self.emit('move', this, newIndex, startIndex)
@@ -146,21 +145,21 @@ function dnd (container, options = {}) {
 
   function _move (node, y) {
     let bb = node.getBoundingClientRect()
-      , containerBottom = parent.offsetHeight + parent.scrollTop
+      , containerBottom = container.offsetHeight + container.scrollTop
       , lowerBound = containerBottom - bb.height / 2
       , top = clamp(y - bb.height / 2, -(bb.height / 2), lowerBound) // Top of the moving node
-      , newY = top + parent.getBoundingClientRect().top + bb.height / 2
+      , newY = top + container.getBoundingClientRect().top + bb.height / 2
       , x = Math.ceil(bb.left) // Round up to ensure we're inside of the `li` node in case a browser rounds down
                               // the `elementFromPoint` call.
 
     // Reposition the traveling node
-    d3.select('.traveler', parent)
+    ul.selectChildren('.traveler')
       .style('top', top + 'px')
       .style('display', 'none') // Hide it so we can get the node under the traveler
 
     let target = document.elementFromPoint(x, newY)
 
-    d3.select('.traveler', parent)
+    ul.selectChildren('.traveler')
       .style('display', '') // Show it again
 
     if (!target) {
@@ -196,7 +195,7 @@ function dnd (container, options = {}) {
    * Rearranges the nodes
    */
   function rearrange (node, target) {
-    let nodes = Array.prototype.slice.call(parent.children)
+    let nodes = Array.prototype.slice.call(container.children)
       , currentIndex = nodes.indexOf(node)
       , targetIndex = nodes.indexOf(target)
       , state = nodes.map((node, idx) => {
@@ -248,8 +247,8 @@ function dnd (container, options = {}) {
     })
   }
 
-  function dndstart (source, parent) {
-    if (d3.select('.traveler', parent).size()) {
+  function dndstart (source) {
+    if (ul.selectChildren('.traveler').size()) {
       // Already created
       return
     }
@@ -268,7 +267,7 @@ function dnd (container, options = {}) {
       .style('z-index', 1000)
       .style('pointerEvents', 'none')
 
-    parent.appendChild(traveler)
+    container.appendChild(traveler)
 
     self.emit('dndstart')
     ul.classed('is-dragging', true)
@@ -282,7 +281,7 @@ function dnd (container, options = {}) {
     d3.select(window).on('keydown.dnd-escape', null)
     d3.select(node).classed('placeholder', false)
                    .property('__startIndex__', null)
-    d3.selectAll('.traveler', parent).remove()
+    ul.selectChildren('.traveler').remove()
   }
 
   ul.selectChildren('li:not(.draggable-list-lock)')
