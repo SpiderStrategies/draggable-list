@@ -7,7 +7,102 @@ const clamp = function (value, min, max) {
   return Math.min(Math.max(value, min), max)
 }
 
-function animate (startingBB, node) {
+const buildState = nodes => {
+  return nodes.map((node, idx) => {
+    let locked = node.classList.contains('draggable-list-lock')
+      , bb = node.getBoundingClientRect()
+
+    return {
+      node,
+      idx,
+      locked,
+      bb
+    }
+  })
+}
+
+const shouldSwap = (state, travelerCenter) => {
+  // Build a virtual list so we don't thrash the DOM
+  let top = 0
+    , list = state.map(item => {
+      let result = {
+        top,
+        height: item.bb.height,
+        center: top + item.bb.height / 2,
+        placeholder: item.placeholder,
+        target: item.target,
+      }
+      top += result.height
+      return result
+    })
+
+  let placeholder = list.find(item => item.placeholder)
+    , target = list.find(item => item.target)
+
+  const isCloserToTarget = () => {
+    return Math.abs(travelerCenter - placeholder.center) > Math.abs(travelerCenter - target.center)
+  }
+
+  let swap = false
+
+  // Based on current location, determine if the traveler node is now closer
+  // to the target
+  if (isCloserToTarget()) {
+    // It's closer to the target, set the swap flag
+    swap = true
+
+    // Now re-arrange the list items and figure out new dimensions
+    list.splice(list.indexOf(target), 0, list.splice(list.indexOf(placeholder), 1)[0])
+
+    // Reassign dimensions
+    let top = 0
+    list.forEach(item => {
+      item.top = top
+      item.center = top + item.height / 2
+      top += item.height
+    })
+
+    // Check another time to see if it's closer to the target again. If so
+    // We don't want to swap b/c it will "jump" between the nodes
+    if (isCloserToTarget()) {
+      // Don't do anything, the original location was a better match
+      swap = false
+    }
+  }
+
+  return swap
+}
+
+const isInvalid = (target, targetIndex, currentIndex, lockedIndexes) => {
+  if (!target) {
+    // We don't have a place to drop this node that's in the ul
+    return true
+  }
+
+  if (currentIndex == targetIndex) {
+    // Same node
+    return true
+  }
+
+  if (target.animated) {
+    // already working
+    return true
+  }
+
+  if (targetIndex == -1) {
+    // Not on a real node, carry on
+    return true
+  }
+
+  if (lockedIndexes.includes(targetIndex)) {
+    // Not a valid location
+    return true
+  }
+
+  return false
+}
+
+const animateItem = (startingBB, node) => {
   let endingBB = node.getBoundingClientRect()
     , ms = 250
 
@@ -65,11 +160,13 @@ function dnd (container, options = {}) {
     , scrollEl = options.scrollEl
     , _autoscrollTimeout
 
-  drag.on('start', function () {
-    let start = Array.prototype.slice.call(container.children).indexOf(this)
+  drag.on('start', function (e) {
+    let nodes = Array.prototype.slice.call(container.children)
+      , state = buildState(nodes)
+      , placeholderIndex = nodes.indexOf(this)
       , node = this
 
-    d3.select(this).property('__startIndex__', start)
+    d3.select(this).property('__startIndex__', placeholderIndex)
     travelerTimeout = setTimeout(dndstart.bind(null, this), 300)
 
     d3.select(window)
@@ -77,8 +174,8 @@ function dnd (container, options = {}) {
          // If it's the escape, then cancel
         if (e.keyCode === 27) {
           self.emit('dndcancel')
-          rearrange(node, container.children[start])
           cleanup(node)
+          rearrange(state, nodes.indexOf(node), placeholderIndex)
         }
       })
   })
@@ -146,38 +243,44 @@ function dnd (container, options = {}) {
   function _move (node, y) {
     let bb = node.getBoundingClientRect()
       , containerBottom = container.offsetHeight + container.scrollTop
-      , lowerBound = containerBottom - bb.height / 2
-      , top = clamp(y - bb.height / 2, -(bb.height / 2), lowerBound) // Top of the moving node
-      , newY = top + container.getBoundingClientRect().top + bb.height / 2
+      , halfHeight = bb.height / 2
+      , travelerTop = clamp(y - halfHeight, -halfHeight, containerBottom - halfHeight) // Top of the moving node
+      , travelerCenter = travelerTop + halfHeight
+      , traveler = ul.selectChildren('.traveler')
       , x = Math.ceil(bb.left) // Round up to ensure we're inside of the `li` node in case a browser rounds down
                               // the `elementFromPoint` call.
+      , nodes = Array.prototype.slice.call(container.children).filter(node => traveler.node() != node)
+      , placeholderIndex = nodes.indexOf(node)
+      , state = buildState(nodes)
+      , lockedIndexes = state.filter(obj => obj.locked).map(obj => obj.idx)
 
-    // Reposition the traveling node
-    ul.selectChildren('.traveler')
-      .style('top', top + 'px')
-      .style('display', 'none') // Hide it so we can get the node under the traveler
+    traveler.style('top', `${travelerTop}px`)
+            .style('display', 'none') // Hide it so we can get the node under the traveler
 
-    let target = document.elementFromPoint(x, newY)
+    let target = document.elementFromPoint(x, travelerCenter + container.getBoundingClientRect().top)
+      , targetIndex = nodes.indexOf(target)
 
-    ul.selectChildren('.traveler')
-      .style('display', '') // Show it again
+    traveler.style('display', '') // Show it again
 
-    if (!target) {
-      // We don't have a place to drop this node that's in the ul
+    if (isInvalid(target, targetIndex, placeholderIndex, lockedIndexes)) {
+      // Can't move in this location
       return
     }
 
-    let targetRect = target.getBoundingClientRect()
-      , targetMiddle = target.offsetTop + targetRect.height / 2
-      , mouseDelta = Math.abs(targetMiddle - (top + bb.height / 2))
-      , mouseOutside = newY < 0 || newY > containerBottom
+    // Store placeholder and target fields on the state objects so
+    // we can use them when determining if to do swaps.
+    state.forEach(item => {
+      if (item.idx == placeholderIndex) {
+        item.placeholder = true
+      }
+      if (item.idx == targetIndex) {
+        item.target = true
+      }
+    })
 
-    if (mouseDelta / targetMiddle > .1 && !mouseOutside) {
-      // Too far away, carry on
-      return
+    if (shouldSwap(state, travelerCenter)) {
+      rearrange(state, targetIndex, placeholderIndex)
     }
-
-    rearrange(node, target)
   }
 
   function lockedSort (objects) {
@@ -191,45 +294,7 @@ function dnd (container, options = {}) {
     return all
   }
 
-  /*
-   * Rearranges the nodes
-   */
-  function rearrange (node, target) {
-    let nodes = Array.prototype.slice.call(container.children)
-      , currentIndex = nodes.indexOf(node)
-      , targetIndex = nodes.indexOf(target)
-      , state = nodes.map((node, idx) => {
-        let locked = node.classList.contains('draggable-list-lock')
-        return {
-          node,
-          idx,
-          locked,
-          bb: node.getBoundingClientRect()
-        }
-      })
-      , unlocked = state.filter(obj => obj.unlocked)
-      , lockedIndexes = state.filter(obj => obj.locked).map(obj => obj.idx)
-
-    if (target.animated) {
-      // already working
-      return
-    }
-
-    if (targetIndex == -1) {
-      // Not on a real node, carry on
-      return
-    }
-
-    if (currentIndex === targetIndex) {
-      // Same node, carry on
-      return
-    }
-
-    if (lockedIndexes.includes(targetIndex)) {
-      // Not a valid location
-      return
-    }
-
+  function rearrange (state, targetIndex, currentIndex) {
     // Move this node to its new location
     state.splice(targetIndex, 0, state.splice(currentIndex, 1)[0])
 
@@ -241,9 +306,9 @@ function dnd (container, options = {}) {
       container.appendChild(obj.node)
     })
 
-    // Once the DOM nodes are in the correct order, run the animation
+    // Run animations on the nodes
     items.forEach(obj => {
-      animate(obj.bb, obj.node)
+      animateItem(obj.bb, obj.node)
     })
   }
 

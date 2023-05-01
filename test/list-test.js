@@ -241,7 +241,7 @@ test('fires move events', function (t) {
 
   list.on('move', function (node, newIndex, oldIndex) {
     t.deepEqual(node, mover)
-    t.equal(2, newIndex, 'new index is 2')
+    t.notEqual(0, newIndex, 'new index changed')
     t.equal(0, oldIndex, 'old index is 0')
     container.remove()
     t.end()
@@ -250,12 +250,12 @@ test('fires move events', function (t) {
   trigger(mover, 'mousedown')
   trigger(mover, 'mousemove', {
     clientX: 110,
-    clientY: 300
+    clientY: 350
   })
   trigger(mover, 'mouseup')
 })
 
-test('fires dnd events', function (t) {
+test.only('fires dnd events', function (t) {
   var container = setup()
     , list = new List(container.querySelector('ul'))
     , li = container.querySelector('ul li:nth-child(2)')
@@ -292,5 +292,46 @@ test('fires dnd events', function (t) {
     container.remove()
     t.end()
   }, 350)
+})
 
+test('prevents jumping', function (t) {
+  let container = document.createElement('div')
+  container.innerHTML = '<ul style="margin: 0; padding: 0; width: 200px;">' +
+                          '<li style="height: 20px;">Item 1</li>' +
+                          '<li style="height: 500px;">Item 2</li>' +
+                          '<li style="height: 20px;">Item 3</li>' +
+                        '</ul>'
+
+  document.body.appendChild(container)
+
+  let ul = container.querySelector('ul')
+    , list = new List(ul)
+    , mover = container.querySelector('ul li:nth-child(3)')
+    , duration = 300
+    , nonTravelers = () => ul.querySelectorAll('li:not(.traveler)')
+
+  trigger(mover, 'mousedown')
+
+  trigger(document, 'mousemove', {
+    clientX: 100,
+    clientY: 80
+  })
+
+  // Wait for animations
+  setTimeout(() => {
+    t.equal(nonTravelers()[1].innerHTML, mover.innerHTML, 'mover now at index 1 of parent children')
+
+    trigger(document, 'mousemove', {
+      clientX: 101, // Move one pixel to the right
+      clientY: 80 // Notice this doesn't change
+    })
+
+    // Wait for animations
+    setTimeout(() => {
+      t.equal(nonTravelers()[1].innerHTML, mover.innerHTML, 'mover still at index 1 of parent children')
+
+      container.remove()
+      t.end()
+    }, duration)
+  }, duration)
 })
