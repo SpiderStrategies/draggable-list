@@ -255,7 +255,7 @@ test('fires move events', function (t) {
   trigger(mover, 'mouseup')
 })
 
-test.only('fires dnd events', function (t) {
+test('fires dnd events', function (t) {
   var container = setup()
     , list = new List(container.querySelector('ul'))
     , li = container.querySelector('ul li:nth-child(2)')
