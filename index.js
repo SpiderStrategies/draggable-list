@@ -10,13 +10,17 @@ const clamp = function (value, min, max) {
 const buildState = nodes => {
   return nodes.map((node, idx) => {
     let locked = node.classList.contains('draggable-list-lock')
+      , style = window.getComputedStyle(node)
       , bb = node.getBoundingClientRect()
 
     return {
       node,
       idx,
       locked,
-      bb
+      bb: Object.assign(bb, {
+        // Include margins of the node
+        outerHeight: bb.height + parseInt(style['margin-top']) + parseInt(style['margin-bottom']),
+      })
     }
   })
 }
@@ -27,7 +31,7 @@ const shouldSwap = (state, travelerCenter) => {
     , list = state.map(item => {
       let result = {
         top,
-        height: item.bb.height,
+        height: item.bb.outerHeight,
         center: top + item.bb.height / 2,
         placeholder: item.placeholder,
         target: item.target,
@@ -54,7 +58,7 @@ const shouldSwap = (state, travelerCenter) => {
     // Now re-arrange the list items and figure out new dimensions
     list.splice(list.indexOf(target), 0, list.splice(list.indexOf(placeholder), 1)[0])
 
-    // Reassign dimensions
+    // Reassign dimensions based on the virtual location
     let top = 0
     list.forEach(item => {
       item.top = top
