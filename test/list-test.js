@@ -241,7 +241,7 @@ test('fires move events', function (t) {
 
   list.on('move', function (node, newIndex, oldIndex) {
     t.deepEqual(node, mover)
-    t.notEqual(0, newIndex, 'new index changed')
+    t.equal(2, newIndex, 'new index changed')
     t.equal(0, oldIndex, 'old index is 0')
     container.remove()
     t.end()

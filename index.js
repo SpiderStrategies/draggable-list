@@ -163,9 +163,14 @@ function dnd (container, options = {}) {
     , dragging = false
     , scrollEl = options.scrollEl
     , _autoscrollTimeout
+    , getNodes = () => {
+      return Array.prototype.slice.call(container.children).filter(node => {
+        return !node.classList.contains('traveler')
+      })
+    }
 
   drag.on('start', function (e) {
-    let nodes = Array.prototype.slice.call(container.children)
+    let nodes = getNodes()
       , state = buildState(nodes)
       , placeholderIndex = nodes.indexOf(this)
       , node = this
@@ -201,7 +206,7 @@ function dnd (container, options = {}) {
     }
 
     let startIndex = d3.select(this).property('__startIndex__')
-      , newIndex = Array.prototype.slice.call(container.children).indexOf(this)
+      , newIndex = getNodes().indexOf(this)
 
     if (newIndex !== startIndex) {
       self.emit('move', this, newIndex, startIndex)
@@ -253,7 +258,7 @@ function dnd (container, options = {}) {
       , traveler = ul.selectChildren('.traveler')
       , x = Math.ceil(bb.left) // Round up to ensure we're inside of the `li` node in case a browser rounds down
                               // the `elementFromPoint` call.
-      , nodes = Array.prototype.slice.call(container.children).filter(node => traveler.node() != node)
+      , nodes = getNodes()
       , placeholderIndex = nodes.indexOf(node)
       , state = buildState(nodes)
       , lockedIndexes = state.filter(obj => obj.locked).map(obj => obj.idx)
